@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Password Generator</title>
+    <style>
+        body {
+            text-align: center;
+            background-color: hsl(0, 0%, 17%);
+            font-family: Arial, Helvetica, sans-serif; 
+            color : white
+        }
+
+        #saveButton {
+            margin: 0 auto;
+        }
+
+        button {
+            color: black;
+        }
+
+        #passwordTextArea{
+            color : black
+        }
+
+    </style>
+    <script>
+        function generatePassword(numPasswords, passwordLength) {
+            const characters = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%&*()?=";
+
+            function generateRandomCharacter() {
+                const randomIndex = Math.floor(Math.random() * characters.length);
+                return characters.charAt(randomIndex);
+            }
+
+            let passwordText = "";
+
+            for (let j = 1; j <= numPasswords; j++) {
+                passwordText += j + ": ";
+                for (let i = 0; i < passwordLength; i++) {
+                    let randomChar = generateRandomCharacter();
+                    if (Math.random() < 0.5) {
+                        randomChar = (randomChar >= 'a' && randomChar <= 'z') ? randomChar.toUpperCase() : randomChar;
+                    }
+                    passwordText += randomChar;
+                }
+                passwordText += '\n';
+            }
+
+            return passwordText;
+        }
+
+        function generatePasswords() {
+            const inputType = document.querySelector('input[name="inputType"]:checked').value;
+            let numPasswords, passwordLength;
+
+            if (inputType === "email") {
+                numPasswords = 15;
+                passwordLength = 30;
+            } else if (inputType === "account") {
+                numPasswords = 15;
+                passwordLength = 50;
+            } else {
+                numPasswords = parseInt(document.getElementById('numPasswords').value, 10);
+                passwordLength = parseInt(document.getElementById('passwordLength').value, 10);
+            }
+
+            if (isNaN(numPasswords) || isNaN(passwordLength) || numPasswords <= 0 || passwordLength <= 0) {
+                alert("Please provide valid input for number of passwords and password length.");
+                return;
+            }
+
+            const passwordText = generatePassword(numPasswords, passwordLength);
+
+            const textArea = document.getElementById('passwordTextArea');
+            textArea.value = passwordText;
+
+            const saveButton = document.getElementById('saveButton');
+            saveButton.style.display = "block";
+        }
+
+        function saveToFile() {
+            const passwordText = document.getElementById('passwordTextArea').value;
+            const blob = new Blob([passwordText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'passwords.txt';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</head>
+<body>
+    <h1>Password Generator</h1>
+    <p>
+        <input type="radio" class="email" name="inputType" value="email" checked> Email (15 passwords, 30 characters)
+        <input type="radio" class="account" name="inputType" value="account"> Account (15 passwords, 50 characters)
+        <input type="radio" class="custom" name="inputType" value="custom"> Custom
+    </p>
+    <p>
+        Number of Passwords: <input type="text" id="numPasswords" placeholder="Enter a number">
+        Password Length: <input type="text" id="passwordLength" placeholder="Enter a number">
+    </p>
+    <button onclick="generatePasswords()">Generate Passwords</button>
+    <button id="saveButton" onclick="saveToFile()" style="display: none;">Save to File</button>
+    <br><br>
+    <textarea id="passwordTextArea" rows="30" cols="100" readonly></textarea>
+</body>
+</html>
